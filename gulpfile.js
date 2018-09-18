@@ -182,7 +182,7 @@ gulp.task("sass:build", function () {
 
 });
 
-gulp.task("serve", ["html", "browser-sync"], function () {
+gulp.task("serve", ["html", "images", "sprite", "browser-sync"], function () {
     // Таск со всеми вотчерами (Следим за файлами - в случае каких либо изменений запускаем соответствующие таски)
 
     gulp.watch("./assets/scss/**/*.scss", ["sass:serve"]);
@@ -192,9 +192,10 @@ gulp.task("serve", ["html", "browser-sync"], function () {
     gulp.watch("./dist/*.html").on("change", browserSync.reload);
     gulp.watch("./dist/js/*.js").on("change", browserSync.reload);
     gulp.watch("./dist/css/*.css").on("change", browserSync.reload);
+    gulp.watch(["./assets/img/*.*", "!./assets/img/sprite/*.png"], ["images"]);
     gulp.watch(["./assets/img/sprite/*.png"], ["sprite"]);
 
 });
 
-gulp.task("build", ["clean", "html", "sass:build", "js:build", "js_libs", "sprite"]);
+gulp.task("build", ["clean", "fonts", "html", "sass:build", "js:build", "js_libs", "sprite"]);
 gulp.task("default", ["serve"]);
