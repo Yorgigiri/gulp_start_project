@@ -1,2 +1,34 @@
-# gulp_start_project
-Start new project with a gulp
+# Frontend. Для сборки используется gulp.
+---------------------------------------
+
+./assets/js/custom/* - Папка с кастомными js файлами (все файлы подключаем в файле assets/js/custom/main.js).
+./assets/js/lib/* - Папка с js библиотеками (все файлы подключаем в файле assets/js/lib/main.js).
+./assets/img/* Папка с картинками (при добавлении новых картинок будет происходить оптимизация lossless с последующим отправлением их в папку dist/img/ за исключением файлов в папке /assets/img/sprite, т.к. они расположены там для таска с созданием спрайта).
+./assets/*.html - все файлы html отслеживаются и при малейшем изменении перекидываться в папку /dist.
+gulp serve - Запуск компиляции и вотча(слежения) scss и .js файлов.
+gulp build - запуск компиляции и минификации scss, js и /img/*
+
+Для подробной инфы смотрим сам gulpfile.js
+
+# Порядок запуска:
+----------------
+
+1.1 устанавливаем node.js глобально (https://docs.npmjs.com/getting-started/installing-node)
+
+1.2 npm install -g
+
+**2. Установка проекта:**
+
+2.1. npm install
+
+2.2*. npm install -g gulp
+
+**3. Запуск локального сервера для разработки :**
+
+3.1. gulp (npm run develop)
+
+**4. Сборка проекта на продакшен:**
+
+4.1. gulp build (npm run build)
+
+** *Таскер находится в ./gulpfile.js, пакеты в package.json. **
