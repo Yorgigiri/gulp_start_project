@@ -114,14 +114,22 @@ gulp.task("js:serve", function () {
 gulp.task("js_libs", function () {
     // Таск для создания js файла с библиотеками
 
-    return gulp.src("./assets/js/lib/main.js")
-        .pipe(concat("lib.js", {
-            newLine: ";"
-        }))
+    var c = browserify({
+        entries: "assets/js/lib/main.js",
+        debug: true,
+        transform: babelify.configure({
+            presets: ["es2015"]
+        })
+    });
+
+    return c.bundle()
+        .pipe(source("lib.min.js"))
         .pipe(uglify())
-        .pipe(rename("lib.min.js"))
-        .pipe(gulp.dest("./dist/js/"))
-        .on("error", util.log);
+        .on("error", util.log)
+        .pipe(gulp.dest("dist/js/"))
+        .pipe(browserSync.reload({
+            stream: true
+        }));
 
 });
 
