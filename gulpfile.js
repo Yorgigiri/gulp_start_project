@@ -12,7 +12,8 @@ const sourcemaps = require("gulp-sourcemaps");
 const autoprefixer = require("gulp-autoprefixer");
 const rename = require("gulp-rename");
 const cssnano = require("gulp-cssnano");
-const uglify = require("gulp-uglify");
+// const uglify = require("gulp-uglify");
+const uglify = require('gulp-uglify-es').default;
 const util = require("gulp-util");
 const imagemin = require("gulp-imagemin");
 const spritesmith = require("gulp.spritesmith");
@@ -49,11 +50,29 @@ gulp.task("html", function () {
 
 });
 
+gulp.task("fonts", function () {
+    // Перемещаем файлы шрифтов из assets/fonts в dist/fonts 
+
+    return gulp.src("assets/fonts/*.*")
+        .pipe(gulp.dest("dist/fonts/"))
+        .on("error", util.log);
+
+});
+
 gulp.task("images", function () {
     // Прогоняем все картинки из assets через оптимизатор и отправляем в папку dist/img
 
     gulp.src(["assets/img/**/*.*", "!assets/img/sprite/*.*"])
-        .pipe(imagemin())
+        .pipe(imagemin([
+            imagemin.jpegtran({
+                interlaced: true,
+                progressive: true,
+                optimizationLevel: 5,
+
+            })
+        ], {
+                verbose: true
+            }))
         .pipe(gulp.dest("dist/img/"))
         .on("error", util.log);
 
@@ -63,7 +82,7 @@ gulp.task("sprite", function () {
     // Генерируем спрайт
 
     var spriteData = gulp.src("assets/img/sprite/*.png").pipe(spritesmith({
-        imgName: "img/sprite/sprite.png",
+        imgName: "../img/sprite/sprite.png",
         cssName: "_sprite.scss"
     }));
 
@@ -72,12 +91,12 @@ gulp.task("sprite", function () {
         // DEV: We must buffer our stream into a Buffer for `imagemin`
         .pipe(buffer())
         .pipe(imagemin())
-        .pipe(gulp.dest("dist/img/sprite"))
+        .pipe(gulp.dest("./dist/img/"))
         .on("error", util.log);
 
     // Pipe CSS stream through CSS optimizer and onto disk
     var cssStream = spriteData.css
-        .pipe(gulp.dest("assets/scss/partials"))
+        .pipe(gulp.dest("./assets/scss/partials/"))
         .on("error", util.log);
 
     // Return a merged stream to handle both `end` events
@@ -114,22 +133,14 @@ gulp.task("js:serve", function () {
 gulp.task("js_libs", function () {
     // Таск для создания js файла с библиотеками
 
-    var c = browserify({
-        entries: "assets/js/lib/main.js",
-        debug: true,
-        transform: babelify.configure({
-            presets: ["es2015"]
-        })
-    });
-
-    return c.bundle()
-        .pipe(source("lib.min.js"))
+    return gulp.src("./assets/js/lib/*.js")
+        .pipe(concat("lib.js", {
+            newLine: ";"
+        }))
         .pipe(uglify())
-        .on("error", util.log)
-        .pipe(gulp.dest("dist/js/"))
-        .pipe(browserSync.reload({
-            stream: true
-        }));
+        .pipe(rename("lib.min.js"))
+        .pipe(gulp.dest("./dist/js/"))
+        .on("error", util.log);
 
 });
 
@@ -190,7 +201,11 @@ gulp.task("sass:build", function () {
 
 });
 
-gulp.task("serve", ["html", "images", "sprite", "browser-sync"], function () {
+gulp.task("watch", function () {
+    gulp.watch(["./assets/img/sprite/*.png"], ["sprite"]);
+});
+
+gulp.task("serve", ["html", "fonts", "images", "sprite", "watch", "browser-sync"], function () {
     // Таск со всеми вотчерами (Следим за файлами - в случае каких либо изменений запускаем соответствующие таски)
 
     gulp.watch("./assets/scss/**/*.scss", ["sass:serve"]);
@@ -201,9 +216,8 @@ gulp.task("serve", ["html", "images", "sprite", "browser-sync"], function () {
     gulp.watch("./dist/js/*.js").on("change", browserSync.reload);
     gulp.watch("./dist/css/*.css").on("change", browserSync.reload);
     gulp.watch(["./assets/img/*.*", "!./assets/img/sprite/*.png"], ["images"]);
-    gulp.watch(["./assets/img/sprite/*.png"], ["sprite"]);
 
 });
 
-gulp.task("build", ["clean", "fonts", "html", "sass:build", "js:build", "js_libs", "sprite"]);
+gulp.task("build", ["fonts", "sprite", "images", "html", "sass:build", "js:build", "js_libs"]);
 gulp.task("default", ["serve"]);
