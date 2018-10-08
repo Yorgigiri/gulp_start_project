@@ -12,7 +12,6 @@ const sourcemaps = require("gulp-sourcemaps");
 const autoprefixer = require("gulp-autoprefixer");
 const rename = require("gulp-rename");
 const cssnano = require("gulp-cssnano");
-// const uglify = require("gulp-uglify");
 const uglify = require('gulp-uglify-es').default;
 const util = require("gulp-util");
 const imagemin = require("gulp-imagemin");
